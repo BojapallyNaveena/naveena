@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced GitHub README Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white transition duration-300">
+
+  <div class="max-w-6xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-3xl font-bold text-purple-700 dark:text-purple-300">🚀 GitHub Profile README Generator</h1>
+      <button onclick="toggleTheme()" class="bg-gray-200 dark:bg-gray-800 px-4 py-2 rounded shadow">🌗 Toggle Theme</button>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Input Form -->
+      <div class="space-y-4">
+        <input type="text" id="name" placeholder="Your Name" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-600" />
+        <input type="text" id="title" placeholder="Your Title" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-600" />
+        <textarea id="bio" rows="3" placeholder="Short Bio..." class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-600"></textarea>
+        <input type="text" id="skills" placeholder="Skills (comma-separated)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-600" />
+        <input type="text" id="linkedin" placeholder="LinkedIn URL" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-600" />
+        <input type="text" id="github" placeholder="GitHub Username" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-600" />
+        <!-- Advanced fields -->
+        <input type="text" id="avatar" placeholder="Profile Image URL (optional)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-600" />
+        <input type="text" id="twitter" placeholder="Twitter Username (optional)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-600" />
+        <input type="text" id="projects" placeholder="Projects (comma-separated: Name|URL)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-600" />
+        <input type="text" id="blog" placeholder="Blog RSS Feed URL (optional)" class="w-full p-2 border rounded dark:bg-gray-800 dark:border-gray-600" />
+
+        <div class="flex gap-4 mt-2">
+          <button type="button" onclick="generateReadme()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-800">Generate</button>
+          <button type="button" onclick="downloadReadme()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-800">Download</button>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div>
+        <h2 class="text-xl font-semibold mb-2">Live Preview:</h2>
+        <div class="flex justify-end gap-2 mb-2">
+          <button type="button" onclick="showRendered()" class="bg-blue-500 text-white px-3 py-1 rounded">🖼️ Rendered View</button>
+          <button type="button" onclick="showRaw()" class="bg-gray-500 text-white px-3 py-1 rounded">📝 Raw Markdown</button>
+        </div>
+        <div id="preview" class="prose dark:prose-invert max-w-none bg-white dark:bg-gray-800 p-4 rounded border dark:border-gray-600 overflow-y-auto h-[400px]"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function generateReadme() {
+      const name = document.getElementById('name').value;
+      const title = document.getElementById('title').value;
+      const bio = document.getElementById('bio').value;
+      const skills = document.getElementById('skills').value.split(',');
+      const linkedin = document.getElementById('linkedin').value;
+      const github = document.getElementById('github').value;
+      const avatar = document.getElementById('avatar').value;
+      const twitter = document.getElementById('twitter').value;
+      const projects = document.getElementById('projects').value.split(',');
+      const blog = document.getElementById('blog').value;
+
+      let md = '';
+
+      // Profile image
+      if (avatar.trim() !== '') {
+        md += `<img src="${avatar}" width="120" align="right" />\n\n`;
+      }
+
+      md += `# Hi, I'm ${name} 👋\n\n`;
+      md += title ? `## ${title}\n\n` : '';
+      md += bio ? `${bio}\n\n` : '';
+
+      // Social badges
+      if (github.trim() !== '') {
+        md += `[![GitHub](https://img.shields.io/badge/GitHub-${github}-181717?style=flat&logo=github)](https://github.com/${github}) `;
+      }
+      if (linkedin.trim() !== '') {
+        md += `[![LinkedIn](https://img.shields.io/badge/LinkedIn-blue?style=flat&logo=linkedin)](${linkedin}) `;
+      }
+      if (twitter.trim() !== '') {
+        md += `[![Twitter](https://img.shields.io/badge/Twitter-@${twitter}-1da1f2?style=flat&logo=twitter)](https://twitter.com/${twitter}) `;
+      }
+      md += '\n\n';
+
+      // Visitor badge
+      if (github.trim() !== '') {
+        md += `![Visitor Badge](https://komarev.com/ghpvc/?username=${github}&style=flat-square)\n\n`;
+      }
+
+      // Skills
+      if (skills.length > 0 && skills[0].trim() !== "") {
+        md += `### 🔧 Skills\n`;
+        md += skills.map(skill => `- ${skill.trim()}`).join('\n') + '\n\n';
+      }
+
+      // Projects
+      if (projects.length > 0 && projects[0].includes('|')) {
+        md += `### 🚀 Projects\n`;
+        projects.forEach(proj => {
+          const [projName, projUrl] = proj.split('|').map(s => s.trim());
+          if (projName && projUrl) {
+            md += `- [${projName}](${projUrl})\n`;
+          }
+        });
+        md += '\n';
+      }
+
+      // GitHub stats
+      if (github.trim() !== "") {
+        md += `![GitHub stats](https://github-readme-stats.vercel.app/api?username=${github}&show_icons=true&theme=radical)\n\n`;
+        md += `![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=${github}&layout=compact)\n\n`;
+      }
+
+      // Blog posts (shows a badge and a placeholder for blog posts)
+      if (blog.trim() !== "") {
+        md += `### 📝 Latest Blog Posts\n`;
+        md += `<!-- BLOG-POST-LIST:START -->\n- [Your blog posts will appear here!](#)\n<!-- BLOG-POST-LIST:END -->\n\n`;
+        md += `[![Blog](https://img.shields.io/badge/Blog-Visit-orange?style=flat&logo=rss)](${blog})\n\n`;
+      }
+
+      document.getElementById('preview').innerHTML = marked.parse(md);
+      document.getElementById('preview').dataset.raw = md;
+    }
+
+    function downloadReadme() {
+      const content = document.getElementById('preview').dataset.raw || '';
+      const blob = new Blob([content], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "README.md";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    function showRendered() {
+      const raw = document.getElementById('preview').dataset.raw || '';
+      document.getElementById('preview').innerHTML = marked.parse(raw);
+    }
+
+    function showRaw() {
+      const raw = document.getElementById('preview').dataset.raw || '';
+      document.getElementById('preview').innerText = raw;
+    }
+  </script>
+</body>
+</html>
